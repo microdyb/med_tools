@@ -8,9 +8,14 @@ chars=string.split(imagename,'.')
 name=chars[0]
 suffix=chars[1]
 image = sitk.ReadImage(imagename)
-nda = sitk.GetArrayFromImage(image)
+height=image.GetHeight()
+width=image.GetWidth()
 
-result=frangi(nda)
-sitk.WriteImage(result, name+'_enhuanced.'+suffix)
-
-
+scale=[2,4,8]
+enhanced_bank=[]
+for i in scale:
+	subsample=image[:width/(i),:height/(i),:]
+	img_frangi=sitk.GetImageFromArray(frangi(sitk.GetArrayFromImage(subsample),(1,2)))
+	result=sitk.Expand(img_frangi, [i,i,1], sitk.sitkLinear)
+	outputname=name+'_enhanced_'+str(i)+'.'+suffix
+	sitk.WriteImage(result,outputname)		
